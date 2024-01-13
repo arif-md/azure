@@ -20,6 +20,13 @@ resource "azurerm_resource_group" "RSG-ref" {
   name     =  var.rg-name
   location = "West Europe"
 }
+
+# Create another resource group
+resource "azurerm_resource_group" "RSG-ref2" {
+  name     =  var.rg-name2
+  location = "West Europe"
+}
+
 # Create a virtual network within the resource group
 #resource "azurerm_virtual_network" "example" {
 #  name                = "example-network"
