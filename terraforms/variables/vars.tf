@@ -8,3 +8,10 @@ variable "rg-name2" {
   type = string
   #default = "RSG-project-5"
 }
+variable "locations" {
+  type = map
+  #default = {
+  #  w-eur = "West Europe"
+  #  e-usa = "east us"
+  #}
+}

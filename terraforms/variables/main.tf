@@ -19,13 +19,13 @@ provider "azurerm" {
 # Create a resource group
 resource "azurerm_resource_group" "RSG-ref" {
   name     =  var.rg-name
-  location = "West Europe"
+  location = "${lookup(var.locations, "e-usa")}"
 }
 
 # Create another resource group
 resource "azurerm_resource_group" "RSG-ref2" {
   name     =  var.rg-name2
-  location = "West Europe"
+  location = "${lookup(var.locations, "w-eur")}"
 }
 
 # Create a virtual network within the resource group
