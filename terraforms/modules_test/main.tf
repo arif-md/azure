@@ -10,13 +10,13 @@ locals {
 }
 
 module "resource_group" {
-  source = "./modules/resource_group"
+  source = "../modules/resource_group"
   prefix = local.prefix  
   location = local.location
 }
 
 module "virtual_network" {
-  source = "./modules/virtual_network"
+  source = "../modules/virtual_network"
   prefix = local.prefix  
   location = local.location
   rsg = module.resource_group.rsg
@@ -25,7 +25,7 @@ module "virtual_network" {
 }
 
 module "virtual_machine1" {
-  source = "./modules/virtual_machine"
+  source = "../modules/virtual_machine"
   location            = module.resource_group.rsg.location
   rsg = module.resource_group.rsg
   #rg_name = azurerm_resource_group.main.name
