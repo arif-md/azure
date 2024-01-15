@@ -8,21 +8,22 @@ resource "random_string" "random" {
 resource "azurerm_network_interface" "MOD-VM" {
   name                = "${var.prefix}-nic-${random_string.random.result}"
   location            = var.location
-  resource_group_name = var.rg_name
+  resource_group_name = var.rsg.name
 
   ip_configuration {
     name                          = "${var.prefix}-ipconfig-${random_string.random.result}"
-    subnet_id                     = var.subnet_id
+    #subnet_id                     = var.subnet_id
+    subnet_id = var.subnet_internal.id
     private_ip_address_allocation = "Dynamic"
   }
 }
 resource "azurerm_virtual_machine" "MOD-VM" {
   name                  = "vm-${random_string.random.result}"
   location            = var.location
-  resource_group_name = var.rg_name
+  resource_group_name = var.rsg.name
   network_interface_ids = [azurerm_network_interface.MOD-VM.id]
   vm_size               = var.vm_size
-
+  delete_os_disk_on_termination = "true"
   storage_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"

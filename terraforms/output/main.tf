@@ -22,6 +22,9 @@ resource "azurerm_resource_group" "RSG-ref" {
   location = "${lookup(var.locations, "e-usa")}"
 }
 
+#provisioner "local_exec" {
+#   echo ${azurerm_resource_group.RSG-ref.id} >> id.txt
+#}
 output "id" {
   value = "${azurerm_resource_group.RSG-ref.id}"
 }

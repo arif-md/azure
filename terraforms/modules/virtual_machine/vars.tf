@@ -1,11 +1,11 @@
 variable "location" {
     type = string
 }
-variable "rg_name" {
-    type = string
+variable "rsg" {
+    description = "required resource group definition"
 }
-variable "subnet_id" {
-    type = string
+variable "subnet_internal" {
+    description = "required subnet internal definition"
 }
 variable "vm_size" {
     type = string
