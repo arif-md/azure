@@ -20,26 +20,13 @@ module "virtual_network" {
   prefix = local.prefix  
   location = local.location
   rsg = module.resource_group.rsg
-  #rg_name = azurerm_resource_group.main.name
-  #depends_on = [azurerm_resource_group.main]
 }
 
 module "virtual_machine1" {
   source = "../modules/virtual_machine"
   location            = module.resource_group.rsg.location
   rsg = module.resource_group.rsg
-  #rg_name = azurerm_resource_group.main.name
   subnet_internal=module.virtual_network.subnet_internal
-  #subnet_id = azurerm_subnet.internal.id
   vm_size = local.vm_size
   prefix = local.prefix  
 }
-
-/*module "virtual_machine2" {
-  source = "./modules/virtual_machine"
-  location            = azurerm_resource_group.main.location
-  rg_name = azurerm_resource_group.main.name
-  subnet_id = azurerm_subnet.internal.id
-  vm_size = local.vm_size
-  prefix = local.prefix
-}*/

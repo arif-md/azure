@@ -12,7 +12,6 @@ resource "azurerm_network_interface" "MOD-VM" {
 
   ip_configuration {
     name                          = "${var.prefix}-ipconfig-${random_string.random.result}"
-    #subnet_id                     = var.subnet_id
     subnet_id = var.subnet_internal.id
     private_ip_address_allocation = "Dynamic"
   }
