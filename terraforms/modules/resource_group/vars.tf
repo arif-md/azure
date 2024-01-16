@@ -1,6 +1,6 @@
 variable "location" {
     type = string
 }
-variable "prefix" {
+variable "name" {
     type = string
 }
