@@ -17,7 +17,7 @@ resource "azurerm_network_interface" "MOD-VM" {
   }
 }
 resource "azurerm_virtual_machine" "MOD-VM" {
-  name                  = "vm-${random_string.random.result}"
+  name                  = "${var.prefix}-vm-${random_string.random.result}"
   location            = var.location
   resource_group_name = var.rsg.name
   network_interface_ids = [azurerm_network_interface.MOD-VM.id]
