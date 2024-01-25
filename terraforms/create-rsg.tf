@@ -1,3 +1,8 @@
+# Perform the following steps to execute this terraform.
+# 1) update the service principal details in the power shell script "env.ps1"
+# 2) execcute the power shell script in order to set the required environment variables (.\env.ps1)
+# 3) terraform init/plan/apply
+
 # We strongly recommend using the required_providers block to set the
 # Azure Provider source and version being used
 terraform {
