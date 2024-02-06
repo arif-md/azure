@@ -1,3 +1,8 @@
+# Perform the following steps to execute this terraform.
+#  1) update the service principal details in the power shell script "env.ps1"
+#  2) execute the power shell script in order to set the required environment variables (.\env.ps1)
+#  3) terraform init/plan/apply
+
 # Azure Provider source and version being used
 terraform {
   required_providers {
@@ -48,7 +53,7 @@ resource "azurerm_linux_web_app" "linux_webapp" {
     application_stack {
       java_version = 17
       java_server = "TOMCAT"
-      java_server_version = "10.0-java17"
+      java_server_version = "10.0"
       #To list all the available stacks, run az webapp list-runtimes --linux
     }
   }
