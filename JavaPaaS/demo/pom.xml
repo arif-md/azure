@@ -46,7 +46,7 @@
                <version>2.13.0</version>
 		        <configuration>
 		            <auth>
-                                <type>service_principal</type>
+		                <type>service_principal</type>
 		                <serverId>azure-auth</serverId>
 		            </auth>
 		            <resourceGroup>rsg-webapps-resources</resourceGroup>
