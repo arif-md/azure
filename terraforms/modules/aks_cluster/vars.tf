@@ -21,6 +21,10 @@ variable "kubernetes_version" {
 variable "system_node_count" {
   type        = number
   description = "Number of AKS worker nodes"
+  validation {
+    condition     = var.system_node_count > 0
+    error_message = "system node count must be greater than 0."
+  }  
 }
 
 variable "system_node_size" {

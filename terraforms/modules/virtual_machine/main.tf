@@ -37,7 +37,9 @@ resource "azurerm_virtual_machine" "MOD-VM" {
     computer_name  = "hostname"
     admin_username = "devops"
     admin_password = "Password1234!"
+    custom_data = var.init_script != null ? file(var.init_script) : null
   }
+  
   os_profile_linux_config {
     disable_password_authentication = false
   }

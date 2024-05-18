@@ -13,3 +13,8 @@ variable "vm_size" {
 variable "prefix" {
     type = string
 }
+variable "init_script" {
+    type = string
+    nullable = true
+    default = null
+}
