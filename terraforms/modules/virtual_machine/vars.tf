@@ -18,3 +18,9 @@ variable "init_script" {
     nullable = true
     default = null
 }
+variable "assign_public_ip" {
+    type = bool
+    nullable = true
+    default = false
+    description = "Should a public IP address assigned to VM?"
+}

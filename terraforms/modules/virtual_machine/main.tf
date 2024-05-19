@@ -4,6 +4,16 @@ resource "random_string" "random" {
   special          = false
   override_special = "/@£$"
 }
+#Public IP definition
+resource "azurerm_public_ip" "MOD-VM" {
+  count               = var.assign_public_ip ? 1 : 0
+  name                = "${var.prefix}-public-ip-${random_string.random.result}"
+  location            = var.location
+  resource_group_name = var.rsg.name
+  allocation_method   = "Static"  # Choose "Dynamic" if you want a dynamic IP
+  sku                 = "Standard"  # Choose "Basic" or "Standard" SKU
+}
+
 # Network interface card definition.
 resource "azurerm_network_interface" "MOD-VM" {
   name                = "${var.prefix}-nic-${random_string.random.result}"
@@ -14,6 +24,7 @@ resource "azurerm_network_interface" "MOD-VM" {
     name                          = "${var.prefix}-ipconfig-${random_string.random.result}"
     subnet_id = var.subnet_internal.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = var.assign_public_ip ? azurerm_public_ip.MOD-VM[0].id : null
   }
 }
 resource "azurerm_virtual_machine" "MOD-VM" {
