@@ -24,3 +24,9 @@ variable "assign_public_ip" {
     default = false
     description = "Should a public IP address assigned to VM?"
 }
+variable "assign_nsg" {
+    type = bool
+    nullable = true
+    default = false
+    description = "Should configure network security rules?"
+}

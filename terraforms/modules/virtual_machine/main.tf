@@ -22,36 +22,97 @@ resource "azurerm_network_interface" "MOD-VM" {
 
   ip_configuration {
     name                          = "${var.prefix}-ipconfig-${random_string.random.result}"
-    subnet_id = var.subnet_internal.id
+    subnet_id                     = var.subnet_internal.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = var.assign_public_ip ? azurerm_public_ip.MOD-VM[0].id : null
   }
 }
-resource "azurerm_virtual_machine" "MOD-VM" {
-  name                  = "${var.prefix}-vm-${random_string.random.result}"
-  location            = var.location
+
+resource "azurerm_network_security_group" "MOD-VM" {
+  count               = var.assign_nsg ? 1 : 0
+  name                = "${var.prefix}-nsg-${random_string.random.result}"
+  location            = "${var.location}"
   resource_group_name = var.rsg.name
-  network_interface_ids = [azurerm_network_interface.MOD-VM.id]
-  vm_size               = var.vm_size
-  delete_os_disk_on_termination = "true"
-  storage_image_reference {
-    publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "16.04-LTS"
-    version   = "latest"
-  }
-  storage_os_disk {
-    name              = "${var.prefix}-osdisk-${random_string.random.result}"
-    create_option     = "FromImage"
-  }
-  os_profile {
-    computer_name  = "hostname"
-    admin_username = "devops"
-    admin_password = "Password1234!"
-    custom_data = var.init_script != null ? file(var.init_script) : null
-  }
-  
-  os_profile_linux_config {
-    disable_password_authentication = false
-  }
 }
+
+resource "azurerm_network_interface_security_group_association" "MOD-VM" {
+  count               = var.assign_nsg ? 1 : 0
+  network_interface_id      = azurerm_network_interface.MOD-VM.id
+  network_security_group_id = azurerm_network_security_group.MOD-VM[0].id
+}
+
+//destination_port_range : This specifies on which ports traffic will be allowed or denied by this rule
+//source_address_prefix  : It specifies the incoming traffic from a specific source IP address range that will be allowed or denied by this rule
+locals { 
+nsgrules = {
+    http = {
+      name                       = "ssh"
+      priority                   = 100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "22" 
+      source_address_prefix      = "*"
+      //destination_address_prefix = var.assign_public_ip ? azurerm_public_ip.MOD-VM[0].ip_address : null
+      destination_address_prefix = "*"
+    }
+  } 
+}
+resource "azurerm_network_security_rule" "MOD-VM" {
+  for_each                    = {
+    for ruleName, rule in local.nsgrules : ruleName => rule
+      if var.assign_nsg
+  }
+  name                        = each.key
+  direction                   = each.value.direction
+  access                      = each.value.access
+  priority                    = each.value.priority
+  protocol                    = each.value.protocol
+  source_port_range           = each.value.source_port_range
+  destination_port_range      = each.value.destination_port_range
+  source_address_prefix       = each.value.source_address_prefix
+  destination_address_prefix  = each.value.destination_address_prefix
+  resource_group_name         = var.rsg.name
+  network_security_group_name = azurerm_network_security_group.MOD-VM[0].name
+}
+
+/*resource "azurerm_network_interface_application_security_group_association" "MOD-VM" {
+    count               = var.assign_nsg ? 1 : 0
+    network_interface_id          = azurerm_network_interface.MOD-VM.id
+    application_security_group_id = azurerm_network_security_group.MOD-VM[0].id
+}*/
+
+resource "azurerm_linux_virtual_machine" "MOD-VM" {
+  name                            = "${var.prefix}-vm-${random_string.random.result}"
+  resource_group_name             = var.rsg.name
+  location                        = var.location
+  size                            = var.vm_size
+  #delete_os_disk_on_termination   = "true"
+  admin_username                  = "devops"
+  admin_password                 = "P@ssw0rd1234!"
+  disable_password_authentication = false
+  admin_ssh_key {
+    username = "devops"
+    public_key = file("~/.ssh/id_rsa.pub")
+  }    
+
+  network_interface_ids           = [azurerm_network_interface.MOD-VM.id]
+
+  os_disk {
+    name                          = "${var.prefix}-osdisk-${random_string.random.result}"
+    caching                       = "ReadWrite"
+    storage_account_type          = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher                     = "Canonical"
+    offer                         = "UbuntuServer"
+    sku                           = "18.04-LTS"
+    version                       = "latest"
+  }
+
+  computer_name = "jenkins-server-${random_string.random.result}"
+  custom_data = var.init_script != null ?  base64encode(file(var.init_script)) : null
+}
+
