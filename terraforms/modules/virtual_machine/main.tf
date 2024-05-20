@@ -84,7 +84,6 @@ resource "azurerm_linux_virtual_machine" "MOD-VM" {
 
   // Check for the images here : https://learn.microsoft.com/en-us/azure/virtual-machines/linux/using-cloud-init
   // And here : https://documentation.ubuntu.com/azure/en/latest/azure-how-to/instances/find-ubuntu-images/
-  // Check the logs at : /var/log/cloud-init.log
   source_image_reference {
     publisher                     = "Canonical"
     offer                         = "0001-com-ubuntu-server-focal"
@@ -92,7 +91,7 @@ resource "azurerm_linux_virtual_machine" "MOD-VM" {
     version                       = "latest"
   }
 
-  computer_name = "jenkins-server-${random_string.random.result}"
+  computer_name = "${var.prefix}-host-${random_string.random.result}"
   custom_data = var.init_script != null ?  base64encode(file(var.init_script)) : null
 }
 
