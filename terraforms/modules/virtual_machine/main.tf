@@ -29,41 +29,24 @@ resource "azurerm_network_interface" "MOD-VM" {
 }
 
 resource "azurerm_network_security_group" "MOD-VM" {
-  count               = var.assign_nsg ? 1 : 0
+  count               = length(var.nsgrules) > 0 ? 1 : 0
   name                = "${var.prefix}-nsg-${random_string.random.result}"
   location            = "${var.location}"
   resource_group_name = var.rsg.name
 }
 
 resource "azurerm_network_interface_security_group_association" "MOD-VM" {
-  count               = var.assign_nsg ? 1 : 0
+  count               = length(var.nsgrules) > 0 ? 1 : 0
   network_interface_id      = azurerm_network_interface.MOD-VM.id
   network_security_group_id = azurerm_network_security_group.MOD-VM[0].id
 }
 
-//destination_port_range : This specifies on which ports traffic will be allowed or denied by this rule
-//source_address_prefix  : It specifies the incoming traffic from a specific source IP address range that will be allowed or denied by this rule
-locals { 
-nsgrules = {
-    http = {
-      name                       = "ssh"
-      priority                   = 100
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "22" 
-      source_address_prefix      = "*"
-      //destination_address_prefix = var.assign_public_ip ? azurerm_public_ip.MOD-VM[0].ip_address : null
-      destination_address_prefix = "*"
-    }
-  } 
-}
 resource "azurerm_network_security_rule" "MOD-VM" {
-  for_each                    = {
-    for ruleName, rule in local.nsgrules : ruleName => rule
+  /*for_each                    = {
+    for ruleName, rule in var.nsgrules : ruleName => rule
       if var.assign_nsg
-  }
+  }*/
+  for_each                    = var.nsgrules
   name                        = each.key
   direction                   = each.value.direction
   access                      = each.value.access
