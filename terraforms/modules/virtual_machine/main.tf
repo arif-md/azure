@@ -55,9 +55,9 @@ resource "azurerm_network_security_rule" "MOD-VM" {
   source_port_range           = each.value.source_port_range
   destination_port_range      = each.value.destination_port_range
   source_address_prefix       = each.value.source_address_prefix
-  destination_address_prefix  = each.value.destination_address_prefix
   resource_group_name         = var.rsg.name
   network_security_group_name = azurerm_network_security_group.MOD-VM[0].name
+  destination_address_prefix  = each.value.destination_address_prefix == "MAP_TO_VM_PVT_IP" ? azurerm_network_interface.MOD-VM.private_ip_address : "*"
 }
 
 resource "azurerm_linux_virtual_machine" "MOD-VM" {
