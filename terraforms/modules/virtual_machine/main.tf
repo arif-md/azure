@@ -77,12 +77,6 @@ resource "azurerm_network_security_rule" "MOD-VM" {
   network_security_group_name = azurerm_network_security_group.MOD-VM[0].name
 }
 
-/*resource "azurerm_network_interface_application_security_group_association" "MOD-VM" {
-    count               = var.assign_nsg ? 1 : 0
-    network_interface_id          = azurerm_network_interface.MOD-VM.id
-    application_security_group_id = azurerm_network_security_group.MOD-VM[0].id
-}*/
-
 resource "azurerm_linux_virtual_machine" "MOD-VM" {
   name                            = "${var.prefix}-vm-${random_string.random.result}"
   resource_group_name             = var.rsg.name
@@ -105,10 +99,13 @@ resource "azurerm_linux_virtual_machine" "MOD-VM" {
     storage_account_type          = "Standard_LRS"
   }
 
+  // Check for the images here : https://learn.microsoft.com/en-us/azure/virtual-machines/linux/using-cloud-init
+  // And here : https://documentation.ubuntu.com/azure/en/latest/azure-how-to/instances/find-ubuntu-images/
+  // Check the logs at : /var/log/cloud-init.log
   source_image_reference {
     publisher                     = "Canonical"
-    offer                         = "UbuntuServer"
-    sku                           = "18.04-LTS"
+    offer                         = "0001-com-ubuntu-server-focal"
+    sku                           = "20_04-lts"
     version                       = "latest"
   }
 
