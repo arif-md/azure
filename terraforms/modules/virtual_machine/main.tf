@@ -1,13 +1,7 @@
-resource "random_string" "random" {
-  length           = 5
-  numeric = true
-  special          = false
-  override_special = "/@£$"
-}
 #Public IP definition
 resource "azurerm_public_ip" "MOD-VM" {
   count               = var.assign_public_ip ? 1 : 0
-  name                = "${var.prefix}-public-ip-${random_string.random.result}"
+  name                = "${var.prefix}-public-ip-${var.random_string}"
   location            = var.location
   resource_group_name = var.rsg.name
   allocation_method   = "Static"  # Choose "Dynamic" if you want a dynamic IP
@@ -16,12 +10,12 @@ resource "azurerm_public_ip" "MOD-VM" {
 
 # Network interface card definition.
 resource "azurerm_network_interface" "MOD-VM" {
-  name                = "${var.prefix}-nic-${random_string.random.result}"
+  name                = "${var.prefix}-nic-${var.random_string}"
   location            = var.location
   resource_group_name = var.rsg.name
 
   ip_configuration {
-    name                          = "${var.prefix}-ipconfig-${random_string.random.result}"
+    name                          = "${var.prefix}-ipconfig-${var.random_string}"
     subnet_id                     = var.subnet_internal.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = var.assign_public_ip ? azurerm_public_ip.MOD-VM[0].id : null
@@ -30,7 +24,7 @@ resource "azurerm_network_interface" "MOD-VM" {
 
 resource "azurerm_network_security_group" "MOD-VM" {
   count               = length(var.nsgrules) > 0 ? 1 : 0
-  name                = "${var.prefix}-nsg-${random_string.random.result}"
+  name                = "${var.prefix}-nsg-${var.random_string}"
   location            = "${var.location}"
   resource_group_name = var.rsg.name
 }
@@ -61,23 +55,23 @@ resource "azurerm_network_security_rule" "MOD-VM" {
 }
 
 resource "azurerm_linux_virtual_machine" "MOD-VM" {
-  name                            = "${var.prefix}-vm-${random_string.random.result}"
+  name                            = "${var.prefix}-vm-${var.random_string}"
   resource_group_name             = var.rsg.name
   location                        = var.location
   size                            = var.vm_size
-  #delete_os_disk_on_termination   = "true"
-  admin_username                  = "devops"
-  admin_password                 = "P@ssw0rd1234!"
-  disable_password_authentication = false
+  #delete_os_disk_on_termination  = "true"
+  admin_username                  = "${var.admin_username}"
+  admin_password                  = "${var.admin_password}"
+  disable_password_authentication = "${var.disable_password_authentication}"
   admin_ssh_key {
-    username = "devops"
+    username = "${var.admin_username}"
     public_key = file("~/.ssh/id_rsa.pub")
   }    
 
   network_interface_ids           = [azurerm_network_interface.MOD-VM.id]
 
   os_disk {
-    name                          = "${var.prefix}-osdisk-${random_string.random.result}"
+    name                          = "${var.prefix}-osdisk-${var.random_string}"
     caching                       = "ReadWrite"
     storage_account_type          = "Standard_LRS"
   }
@@ -85,13 +79,13 @@ resource "azurerm_linux_virtual_machine" "MOD-VM" {
   // Check for the images here : https://learn.microsoft.com/en-us/azure/virtual-machines/linux/using-cloud-init
   // And here : https://documentation.ubuntu.com/azure/en/latest/azure-how-to/instances/find-ubuntu-images/
   source_image_reference {
-    publisher                     = "Canonical"
-    offer                         = "0001-com-ubuntu-server-focal"
-    sku                           = "20_04-lts"
-    version                       = "latest"
+    publisher                     = "${var.image_publisher}"
+    offer                         = "${var.image_offer}"
+    sku                           = "${var.image_sku}"
+    version                       = "${var.image_ver}"
   }
 
-  computer_name = "${var.prefix}-host-${random_string.random.result}"
+  computer_name = "${var.prefix}-host-${var.random_string}"
   custom_data = var.init_script != null ?  base64encode(file(var.init_script)) : null
 }
 
